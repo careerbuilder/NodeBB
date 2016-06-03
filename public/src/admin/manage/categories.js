@@ -167,10 +167,6 @@ define('admin/manage/categories', ['vendor/jquery/serializeObject/jquery.ba-seri
 			});
 		});
 
-		if (!categories.length) {
-			continueRender();
-		}
-
 		function continueRender() {
 			templates.parse('admin/partials/categories/category-rows', {
 				cid: parentId,

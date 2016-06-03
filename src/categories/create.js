@@ -48,7 +48,7 @@ module.exports = function(Categories) {
 			function(data, next) {
 				category = data.category;
 
-				var defaultPrivileges = ['find', 'read', 'topics:read', 'topics:create', 'topics:reply'];
+				var defaultPrivileges = ['find', 'read', 'topics:create', 'topics:reply'];
 
 				async.series([
 					async.apply(db.setObject, 'category:' + category.cid, category),
@@ -57,12 +57,12 @@ module.exports = function(Categories) {
 					async.apply(db.sortedSetAdd, 'cid:' + parentCid + ':children', category.order, category.cid),
 					async.apply(privileges.categories.give, defaultPrivileges, category.cid, 'administrators'),
 					async.apply(privileges.categories.give, defaultPrivileges, category.cid, 'registered-users'),
-					async.apply(privileges.categories.give, ['find', 'read', 'topics:read'], category.cid, 'guests')
+					async.apply(privileges.categories.give, ['find', 'read'], category.cid, 'guests')
 				], next);
 			},
 			function(results, next) {
 				if (data.cloneFromCid && parseInt(data.cloneFromCid, 10)) {
-					return Categories.copySettingsFrom(data.cloneFromCid, category.cid, !data.parentCid, next);
+					return Categories.copySettingsFrom(data.cloneFromCid, category.cid, next);
 				}
 				next(null, category);
 			},
@@ -81,7 +81,7 @@ module.exports = function(Categories) {
 		return [backgrounds[index], text[index]];
 	};
 
-	Categories.copySettingsFrom = function(fromCid, toCid, copyParent, callback) {
+	Categories.copySettingsFrom = function(fromCid, toCid, callback) {
 		var destination;
 		async.waterfall([
 			function (next) {
@@ -97,14 +97,13 @@ module.exports = function(Categories) {
 				destination = results.destination;
 
 				var tasks = [];
-				
-				if (copyParent && utils.isNumber(destination.parentCid)) {
-					tasks.push(async.apply(db.sortedSetRemove, 'cid:' + destination.parentCid + ':children', toCid));
+				if (utils.isNumber(results.source.parentCid)) {
+					tasks.push(async.apply(db.sortedSetAdd, 'cid:' + results.source.parentCid + ':children', results.source.order, toCid));
 				}
 
-				if (copyParent && utils.isNumber(results.source.parentCid)) {
-					tasks.push(async.apply(db.sortedSetAdd, 'cid:' + results.source.parentCid + ':children', results.source.order, toCid));
-				}				
+				if (destination && utils.isNumber(destination.parentCid)) {
+					tasks.push(async.apply(db.sortedSetRemove, 'cid:' + destination.parentCid + ':children', toCid));
+				}
 
 				destination.description = results.source.description;
 				destination.descriptionParsed = results.source.descriptionParsed;
@@ -115,11 +114,8 @@ module.exports = function(Categories) {
 				destination.numRecentReplies = results.source.numRecentReplies;
 				destination.class = results.source.class;
 				destination.imageClass = results.source.imageClass;
-				
-				if (copyParent) {
-					destination.parentCid = results.source.parentCid || 0;	
-				}
-				
+				destination.parentCid = results.source.parentCid || 0;
+
 				tasks.push(async.apply(db.setObject, 'category:' + toCid, destination));
 
 				async.series(tasks, next);
@@ -134,7 +130,7 @@ module.exports = function(Categories) {
 
 	Categories.copyPrivilegesFrom = function(fromCid, toCid, callback) {
 		var privilegeList = [
-			'find', 'read', 'topics:create', 'topics:read', 'topics:reply', 'purge', 'mods',
+			'find', 'read', 'topics:create', 'topics:reply', 'purge', 'mods',
 			'groups:find', 'groups:read', 'groups:topics:create', 'groups:topics:reply', 'groups:purge', 'groups:moderate'
 		];
 

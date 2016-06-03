@@ -53,11 +53,11 @@ define('admin/settings', ['uploader', 'sounds'], function(uploader, sounds) {
 					}
 				}
 			} else if (field.is('textarea')) {
-				if (app.config.hasOwnProperty(key)) {
+				if (app.config[key]) {
 					field.val(app.config[key]);
 				}
 			} else if (field.is('select')) {
-				if (app.config.hasOwnProperty(key)) {
+				if (app.config[key]) {
 					field.val(app.config[key]);
 				}
 			}

@@ -6,8 +6,5 @@
     "selected": "Vybrané",
     "all": "Vše",
     "all_categories": "All categories",
-    "topics_marked_as_read.success": "Téma bylo označeno jako přečtené!",
-    "all-topics": "Všechna témata",
-    "new-topics": "Nová témata",
-    "watched-topics": "Sledovaná témata"
+    "topics_marked_as_read.success": "Téma bylo označeno jako přečtené!"
 }

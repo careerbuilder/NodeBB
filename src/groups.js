@@ -349,9 +349,7 @@ var utils = require('../public/src/utils');
 
 	Groups.getLatestMemberPosts = function(groupName, max, uid, callback) {
 		async.waterfall([
-			function(next) {
-				Groups.getMembers(groupName, 0, -1, next);
-			},
+			async.apply(Groups.getMembers, groupName, 0, -1),
 			function(uids, next) {
 				if (!Array.isArray(uids) || !uids.length) {
 					return callback(null, []);

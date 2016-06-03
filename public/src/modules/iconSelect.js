@@ -20,7 +20,6 @@ define('iconSelect', function() {
 			var picker = bootbox.dialog({
 					onEscape: true,
 					backdrop: true,
-					show: false,
 					message: html,
 					title: 'Select an Icon',
 					buttons: {
@@ -42,11 +41,9 @@ define('iconSelect', function() {
 								var iconClass = $('.bootbox .selected').attr('class');
 								var categoryIconClass = $('<div/>').addClass(iconClass).removeClass('fa').removeClass('selected').attr('class');
 
-								if (categoryIconClass) {
-									el.attr('class', 'fa ' + (doubleSize ? 'fa-2x ' : '') + categoryIconClass);
-									el.val(categoryIconClass);
-									el.attr('value', categoryIconClass);
-								}
+								el.attr('class', 'fa ' + (doubleSize ? 'fa-2x ' : '') + categoryIconClass);
+								el.val(categoryIconClass);
+								el.attr('value', categoryIconClass);
 
 								onModified(el);
 							}
@@ -54,41 +51,19 @@ define('iconSelect', function() {
 					}
 				});
 
-			picker.on('show.bs.modal', function() {
-				var modalEl = $(this),
-					searchEl = modalEl.find('input');
-
-				if (selected) {
-					modalEl.find('.' + selected).addClass('selected');
-					searchEl.val(selected.replace('fa-', ''));
-				}
-			}).modal('show');
-
 			picker.on('shown.bs.modal', function() {
 				var modalEl = $(this),
 					searchEl = modalEl.find('input'),
 					icons = modalEl.find('.fa-icons i'),
 					submitEl = modalEl.find('button.btn-primary');
 
-				function changeSelection(newSelection) {
-					modalEl.find('i.selected').removeClass('selected');
-					if (newSelection) {
-						newSelection.addClass('selected');
-					} else if (searchEl.val().length === 0) {
-						if (selected) {
-							modalEl.find('.' + selected).addClass('selected');
-						}
-					} else {
-						modalEl.find('i:visible').first().addClass('selected');
-					}
-				}
-
 				// Focus on the input box
-				searchEl.selectRange(0, searchEl.val().length);
+				searchEl.focus();
 
 				modalEl.find('.icon-container').on('click', 'i', function() {
-					searchEl.val($(this).attr('class').replace('fa fa-', '').replace('selected', ''));
-					changeSelection($(this));
+					searchEl.val($(this).attr('class').replace('fa fa-', ''));
+					modalEl.find('.icon-container i').removeClass('selected');
+					$(this).addClass('selected');
 				});
 
 				searchEl.on('keyup', function(e) {
@@ -100,8 +75,9 @@ define('iconSelect', function() {
 								$(el).hide();
 							}
 						});
-						changeSelection();
 					} else {
+						// Pick first match
+						$('.icon-container i:visible').first().addClass('selected');
 						submitEl.click();
 					}
 				});

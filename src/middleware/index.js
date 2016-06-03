@@ -14,7 +14,6 @@ var meta = require('../meta'),
 	compression = require('compression'),
 	favicon = require('serve-favicon'),
 	session = require('express-session'),
-	cls = require('./cls'),
 	useragent = require('express-useragent');
 
 
@@ -62,10 +61,6 @@ module.exports = function(app) {
 	if (nconf.get('secure')) {
 		cookie.secure = true;
 	}
-	
-	if (relativePath !== '') {
-		cookie.path = relativePath;
-	}
 
 	app.use(session({
 		store: db.sessionStore,
@@ -78,7 +73,6 @@ module.exports = function(app) {
 
 	app.use(middleware.addHeaders);
 	app.use(middleware.processRender);
-	app.use(cls.http);
 	auth.initialize(app, middleware);
 
 	return middleware;

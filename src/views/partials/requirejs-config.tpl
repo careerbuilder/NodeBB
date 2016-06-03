@@ -6,8 +6,7 @@
 		paths: {
 			'forum': '../client',
 			'admin': '../admin',
-			'vendor': '../../vendor',
-			'plugins': '../../plugins'
+			'vendor': '../../vendor'
 		}
 	});
 </script>

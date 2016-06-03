@@ -36,7 +36,6 @@ define('forum/account/edit', ['forum/account/header', 'uploader', 'translator'],
 			website: $('#inputWebsite').val(),
 			birthday: $('#inputBirthday').val(),
 			location: $('#inputLocation').val(),
-			groupTitle: $('#groupTitle').val(),
 			signature: $('#inputSignature').val(),
 			aboutme: $('#inputAboutMe').val()
 		};

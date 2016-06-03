@@ -171,7 +171,7 @@ function forkWorker(index, isPrimary) {
 	}
 
 	process.env.isPrimary = isPrimary;
-	process.env.isCluster = ports.length > 1 ? true : false;
+	process.env.isCluster = true;
 	process.env.port = ports[index];
 
 	var worker = fork('app.js', [], {

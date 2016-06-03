@@ -16,9 +16,7 @@ define('forum/tag', ['forum/recent', 'forum/infinitescroll'], function(recent, i
 			loadMoreTopics();
 		});
 
-		if (!config.usePagination) {
-			infinitescroll.init(loadMoreTopics);
-		}
+		infinitescroll.init(loadMoreTopics);
 
 		function loadMoreTopics(direction) {
 			if(direction < 0 || !$('[component="category"]').length) {

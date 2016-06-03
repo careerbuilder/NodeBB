@@ -520,7 +520,7 @@ module.exports = function(db, module) {
 			return callback();
 		}
 		var data = {};
-		value = helpers.valueToString(value);
+		value = helpers.fieldToString(value);
 		data.score = parseInt(increment, 10);
 
 		db.collection('objects').findAndModify({_key: key, value: value}, {}, {$inc: data}, {new: true, upsert: true}, function(err, result) {

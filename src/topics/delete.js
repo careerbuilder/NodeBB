@@ -1,12 +1,12 @@
 'use strict';
 
-var async = require('async');
-var db = require('../database');
+var async = require('async'),
+	db = require('../database'),
 
-var user = require('../user');
-var posts = require('../posts');
-var plugins = require('../plugins');
-var batch = require('../batch');
+	user = require('../user'),
+	posts = require('../posts'),
+	plugins = require('../plugins'),
+	batch = require('../batch');
 
 
 module.exports = function(Topics) {
@@ -113,11 +113,9 @@ module.exports = function(Topics) {
 			function(next) {
 				db.deleteAll([
 					'tid:' + tid + ':followers',
-					'tid:' + tid + ':ignorers',
 					'tid:' + tid + ':posts',
 					'tid:' + tid + ':posts:votes',
-					'tid:' + tid + ':bookmarks',
-					'tid:' + tid + ':posters'
+					'tid:' + tid + ':bookmarks'
 				], next);
 			},
 			function(next) {

@@ -52,8 +52,7 @@
 			loginStrategies.forEach(function(strategy) {
 				if (strategy.url) {
 					router.get(strategy.url, passport.authenticate(strategy.name, {
-						scope: strategy.scope,
-						prompt: strategy.prompt || undefined
+						scope: strategy.scope
 					}));
 				}
 

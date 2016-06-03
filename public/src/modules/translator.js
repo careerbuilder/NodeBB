@@ -72,6 +72,10 @@
 				languageCode = 'en';
 				break;
 
+			case 'cs':
+				languageCode = 'cz';
+				break;
+
 			case 'fa_IR':
 				languageCode = 'fa';
 				break;
@@ -105,6 +109,17 @@
 			$.getScript(RELATIVE_PATH + '/vendor/jquery/timeago/locales/jquery.timeago.' + languageCode + '-short.js').success(function() {
 				// Switch back to long-form
 				translator.toggleTimeagoShorthand();
+			}).fail(function() {
+				$.getScript(RELATIVE_PATH + '/vendor/jquery/timeago/locales/jquery.timeago.en-short.js').success(function() {
+					// Switch back to long-form
+					translator.toggleTimeagoShorthand();
+				});
+			});
+		}).fail(function() {
+			$.getScript(RELATIVE_PATH + '/vendor/jquery/timeago/locales/jquery.timeago.en-short.js').success(function() {
+				// Switch back to long-form
+				translator.toggleTimeagoShorthand();
+				$.getScript(RELATIVE_PATH + '/vendor/jquery/timeago/locales/jquery.timeago.en.js');
 			});
 		});
 

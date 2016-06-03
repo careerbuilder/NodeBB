@@ -40,8 +40,7 @@
 			$.get(RELATIVE_PATH + '/api/widgets/render' + (config['cache-buster'] ? '?v=' + config['cache-buster'] : ''), {
 				locations: locations,
 				template: template + '.tpl',
-				url: url,
-				isMobile: utils.isMobile()
+				url: url
 			}, function(renderedAreas) {
 				for (var x=0; x<renderedAreas.length; ++x) {
 					var renderedWidgets = renderedAreas[x].widgets,

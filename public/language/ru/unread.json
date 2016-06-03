@@ -6,8 +6,5 @@
     "selected": "Выбранное",
     "all": "Все",
     "all_categories": "Все категории",
-    "topics_marked_as_read.success": "Темы помечены как прочитанные!",
-    "all-topics": "All Topics",
-    "new-topics": "New Topics",
-    "watched-topics": "Watched Topics"
+    "topics_marked_as_read.success": "Темы помечены как прочитанные!"
 }

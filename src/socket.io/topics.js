@@ -36,6 +36,10 @@ SocketTopics.post = function(socket, data, callback) {
 			return callback(err);
 		}
 
+		if (data.lock) {
+			SocketTopics.doTopicAction('lock', 'event:topic_locked', socket, {tids: [result.topicData.tid], cid: result.topicData.cid});
+		}
+
 		callback(null, result.topicData);
 
 		socket.emit('event:new_post', {posts: [result.postData]});
@@ -65,22 +69,19 @@ SocketTopics.createTopicFromPosts = function(socket, data, callback) {
 		return callback(new Error('[[error:invalid-data]]'));
 	}
 
-	topics.createTopicFromPosts(socket.uid, data.title, data.pids, data.fromTid, callback);
+	topics.createTopicFromPosts(socket.uid, data.title, data.pids, callback);
 };
 
-SocketTopics.changeWatching = function(socket, data, callback) {
-	if (!data.tid || !data.type) {
-		return callback(new Error('[[error:invalid-data]]'));
-	}
-	var commands = ['follow', 'unfollow', 'ignore'];
-	if (commands.indexOf(data.type) === -1) {
-		return callback(new Error('[[error:invalid-command]]'));
-	}
-	followCommand(topics[data.type], socket, data.tid, callback);
+SocketTopics.toggleFollow = function(socket, tid, callback) {
+	followCommand(topics.toggleFollow, socket, tid, callback);
 };
 
 SocketTopics.follow = function(socket, tid, callback) {
 	followCommand(topics.follow, socket, tid, callback);
+};
+
+SocketTopics.toggleResolve = function(socket, tid, callback) {
+	followCommand(topics.toggleResolve, socket, tid, callback);
 };
 
 function followCommand(method, socket, tid, callback) {
@@ -90,12 +91,6 @@ function followCommand(method, socket, tid, callback) {
 
 	method(tid, socket.uid, callback);
 }
-
-SocketTopics.isFollowed = function(socket, tid, callback) {
-	topics.isFollowing([tid], socket.uid, function(err, isFollowing) {
-		callback(err, Array.isArray(isFollowing) && isFollowing.length ? isFollowing[0] : false);
-	});
-};
 
 SocketTopics.search = function(socket, data, callback) {
 	topics.search(data.tid, data.term, callback);

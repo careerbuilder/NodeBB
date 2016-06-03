@@ -1,17 +1,16 @@
 'use strict';
 
-var	async = require('async');
-var winston = require('winston');
-var _ = require('underscore');
+var	async = require('async'),
+	winston = require('winston'),
+	_ = require('underscore'),
 
-var user = require('../user');
-var utils = require('../../public/src/utils');
-var plugins = require('../plugins');
-var notifications = require('../notifications');
-var db = require('./../database');
+	user = require('../user'),
+	utils = require('../../public/src/utils'),
+	plugins = require('../plugins'),
+	notifications = require('../notifications'),
+	db = require('./../database');
 
 module.exports = function(Groups) {
-
 	Groups.join = function(groupName, uid, callback) {
 		function join() {
 			var tasks = [
@@ -40,7 +39,7 @@ module.exports = function(Groups) {
 					async.parallel(tasks, next);
 				},
 				function(results, next) {
-					setGroupTitleIfNotSet(groupName, uid, next);
+					user.setGroupTitle(groupName, uid, next);
 				},
 				function(next) {
 					plugins.fireHook('action:group.join', {
@@ -80,20 +79,6 @@ module.exports = function(Groups) {
 			});
 		});
 	};
-
-	function setGroupTitleIfNotSet(groupName, uid, callback) {
-		if (groupName === 'registered-users') {
-			return callback();
-		}
-
-		db.getObjectField('user:' + uid, 'groupTitle', function(err, currentTitle) {
-			if (err || (currentTitle || currentTitle === '')) {
-				return callback(err);
-			}
-
-			user.setUserField(uid, 'groupTitle', groupName, callback);
-		});
-	}
 
 	Groups.requestMembership = function(groupName, uid, callback) {
 		async.waterfall([
@@ -429,7 +414,7 @@ module.exports = function(Groups) {
 		}
 		db.getSetMembers('group:' + groupName + ':pending', callback);
 	};
-
+	
 	Groups.kick = function(uid, groupName, isOwner, callback) {
 		if (isOwner) {
 			// If the owners set only contains one member, error out!

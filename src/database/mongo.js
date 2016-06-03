@@ -37,8 +37,8 @@
 		},
 		{
 			name: "mongo:database",
-			description: "MongoDB database name",
-			'default': nconf.get('mongo:database') || 'nodebb'
+			description: "Which database to use",
+			'default': nconf.get('mongo:database') || 0
 		}
 	];
 
@@ -74,7 +74,7 @@
 			nconf.set('mongo:port', 27017);
 		}
 		if (!nconf.get('mongo:database')) {
-			nconf.set('mongo:database', 'nodebb');
+			nconf.set('mongo:database', '0');
 		}
 
 		var hosts = nconf.get('mongo:host').split(',');

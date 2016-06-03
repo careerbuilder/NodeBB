@@ -48,7 +48,3 @@ pidfile
 ## Transifex
 tx.exe
 .transifexrc
-
-##Coverage output
-coverage
-.env

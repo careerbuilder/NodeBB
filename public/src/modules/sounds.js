@@ -8,14 +8,18 @@ define('sounds', ['buzz'], function(buzz) {
 	var eventSoundMapping;
 	var files;
 
-	socket.on('event:sounds.reloadMapping', function() {
+	socket.on('event:sounds.reloadMapping', loadMapping);
+
+	function loadMapping(callback) {
+		callback = callback || function() {};
 		socket.emit('modules.sounds.getMapping', function(err, mapping) {
 			if (err) {
 				return app.alertError('[sounds] Could not load sound mapping!');
 			}
 			eventSoundMapping = mapping;
+			callback();
 		});
-	});
+	}
 
 	function loadData(callback) {
 		socket.emit('modules.sounds.getData', function(err, data) {

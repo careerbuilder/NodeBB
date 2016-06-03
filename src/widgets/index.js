@@ -1,12 +1,12 @@
 "use strict";
 
-var async = require('async');
-var winston = require('winston');
-var templates = require('templates.js');
+var async = require('async'),
+	winston = require('winston'),
+	templates = require('templates.js'),
 
-var plugins = require('../plugins');
-var translator = require('../../public/src/modules/translator');
-var db = require('../database');
+	plugins = require('../plugins'),
+	translator = require('../../public/src/modules/translator'),
+	db = require('../database');
 
 var widgets = {};
 
@@ -30,10 +30,7 @@ widgets.render = function(uid, area, req, res, callback) {
 			}
 
 			async.map(widgetsByLocation[location], function(widget, next) {
-				if (!widget || !widget.data ||
-					(!!widget.data['hide-registered'] && uid !== 0) ||
-					(!!widget.data['hide-guests'] && uid === 0) ||
-					(!!widget.data['hide-mobile'] && area.isMobile)) {
+				if (!widget || !widget.data || (!!widget.data['hide-registered'] && uid !== 0) || (!!widget.data['hide-guests'] && uid === 0)) {
 					return next();
 				}
 

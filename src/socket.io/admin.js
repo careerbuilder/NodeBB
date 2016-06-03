@@ -33,8 +33,7 @@ var	async = require('async'),
 		settings: {},
 		email: {},
 		analytics: {},
-		logs: {},
-		errors: {}
+		logs: {}
 	};
 
 SocketAdmin.before = function(socket, method, data, next) {
@@ -254,11 +253,6 @@ SocketAdmin.logs.get = function(socket, data, callback) {
 
 SocketAdmin.logs.clear = function(socket, data, callback) {
 	meta.logs.clear(callback);
-};
-
-SocketAdmin.errors.clear = function(socket, data, callback) {
-	console.log('clearing errors?');
-	meta.errors.clear(callback);
 };
 
 SocketAdmin.getMoreEvents = function(socket, next, callback) {

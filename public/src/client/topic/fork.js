@@ -55,8 +55,7 @@ define('forum/topic/fork', ['components', 'postSelect'], function(components, po
 		forkCommit.attr('disabled', true);
 		socket.emit('topics.createTopicFromPosts', {
 			title: forkModal.find('#fork-title').val(),
-			pids: postSelect.pids,
-			fromTid: ajaxify.data.tid
+			pids: postSelect.pids
 		}, function(err, newTopic) {
 			function fadeOutAndRemove(pid) {
 				components.get('post', 'pid', pid).fadeOut(500, function() {

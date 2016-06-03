@@ -113,11 +113,7 @@ var fallbackTransport;
 				}
 			}
 		], function (err) {
-			if (err && err.code === 'ENOENT') {
-				callback(new Error('[[error:sendmail-not-found]]'));
-			} else {
-				callback(err);
-			}
+			callback(err);
 		});
 	};
 

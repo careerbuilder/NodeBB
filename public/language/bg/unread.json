@@ -6,8 +6,5 @@
     "selected": "Избраните",
     "all": "Всички",
     "all_categories": "Всички категории",
-    "topics_marked_as_read.success": "Темите бяха отбелязани като прочетени!",
-    "all-topics": "Всички теми",
-    "new-topics": "Нови теми",
-    "watched-topics": "Наблюдавани теми"
+    "topics_marked_as_read.success": "Темите бяха отбелязани като прочетени!"
 }

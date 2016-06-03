@@ -1,15 +1,14 @@
 "use strict";
 
-var async = require('async');
-var nconf = require('nconf');
-var validator = require('validator');
-
-var meta = require('../meta');
-var groups = require('../groups');
-var user = require('../user');
-var helpers = require('./helpers');
-
-var groupsController = {};
+var async = require('async'),
+	nconf = require('nconf'),
+	validator = require('validator'),
+	meta = require('../meta'),
+	groups = require('../groups'),
+	user = require('../user'),
+	helpers = require('./helpers'),
+	plugins = require('../plugins'),
+	groupsController = {};
 
 groupsController.list = function(req, res, next) {
 	var sort = req.query.sort || 'alpha';
@@ -84,20 +83,22 @@ groupsController.details = function(req, res, callback) {
 				},
 				isAdmin: async.apply(user.isAdministrator, req.uid)
 			}, next);
+		},
+		function (results, next) {
+			if (!results.group) {
+				return callback();
+			}
+			results.title = '[[pages:group, ' + results.group.displayName + ']]';
+			results.breadcrumbs = helpers.buildBreadcrumbs([{text: '[[pages:groups]]', url: '/groups' }, {text: results.group.displayName}]);
+			results.allowPrivateGroups = parseInt(meta.config.allowPrivateGroups, 10) === 1;
+			plugins.fireHook('filter:group.build', {req: req, res: res, templateData: results}, next);
 		}
 	], function(err, results) {
 		if (err) {
 			return callback(err);
 		}
 
-		if (!results.group) {
-			return callback();
-		}
-		results.title = '[[pages:group, ' + results.group.displayName + ']]';
-		results.breadcrumbs = helpers.buildBreadcrumbs([{text: '[[pages:groups]]', url: '/groups' }, {text: results.group.displayName}]);
-		results.allowPrivateGroups = parseInt(meta.config.allowPrivateGroups, 10) === 1;
-
-		res.render('groups/details', results);
+		res.render('groups/details', results.templateData);
 	});
 };
 

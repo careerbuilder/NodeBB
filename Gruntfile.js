@@ -7,16 +7,15 @@ var fork = require('child_process').fork,
 
 
 module.exports = function(grunt) {
-	var args = [];
-	if (!grunt.option('verbose')) {
-		args.push('--log-level=info');
-	}
-
 	function update(action, filepath, target) {
-		var updateArgs = args.slice(),
+		var args = [],
 			fromFile = '',
 			compiling = '',
 			time = Date.now();
+
+		if (!grunt.option('verbose')) {
+			args.push('--log-level=info');
+		}
 		
 		if (target === 'lessUpdated_Client') {
 			fromFile = ['js', 'tpl', 'acpLess'];
@@ -38,11 +37,11 @@ module.exports = function(grunt) {
 			return incomplete.indexOf(ext) === -1;
 		});
 
-		updateArgs.push('--from-file=' + fromFile.join(','));
+		args.push('--from-file=' + fromFile.join(','));
 		incomplete.push(compiling);
 
 		worker.kill();
-		worker = fork('app.js', updateArgs, { env: env });
+		worker = fork('app.js', args, { env: env });
 
 		worker.on('message', function() {
 			if (incomplete.length) {
@@ -102,6 +101,6 @@ module.exports = function(grunt) {
 
 	env.NODE_ENV = 'development';
 
-	worker = fork('app.js', args, { env: env });
+	worker = fork('app.js', [], { env: env });
 	grunt.event.on('watch', update);
 };

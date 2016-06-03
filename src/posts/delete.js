@@ -24,15 +24,15 @@ module.exports = function(Posts) {
 			},
 			function (_post, next) {
 				postData = _post;
-				topics.getTopicFields(_post.tid, ['tid', 'cid', 'pinned'], next);
+				topics.getTopicField(_post.tid, 'cid', next);
 			},
-			function (topicData, next) {
+			function (cid, next) {
 				async.parallel([
 					function(next) {
-						updateTopicTimestamp(topicData, next);
+						updateTopicTimestamp(postData.tid, next);
 					},
 					function(next) {
-						db.sortedSetRemove('cid:' + topicData.cid + ':pids', pid, next);
+						db.sortedSetRemove('cid:' + cid + ':pids', pid, next);
 					},
 					function(next) {
 						Posts.dismissFlag(pid, next);
@@ -40,11 +40,10 @@ module.exports = function(Posts) {
 					function(next) {
 						topics.updateTeaser(postData.tid, next);
 					}
-				], next);
-			},
-			function (results, next) {
-				plugins.fireHook('action:post.delete', pid);
-				next(null, postData);
+				], function(err) {
+					plugins.fireHook('action:post.delete', pid);
+					next(err, postData);
+				});
 			}
 		], callback);
 	};
@@ -63,56 +62,45 @@ module.exports = function(Posts) {
 			},
 			function (_post, next) {
 				postData = _post;
-				topics.getTopicFields(_post.tid, ['tid', 'cid', 'pinned'], next);
+				topics.getTopicField(_post.tid, 'cid', next);
 			},
-			function (topicData, next) {
-				postData.cid = topicData.cid;
+			function (cid, next) {
+				postData.cid = cid;
 				async.parallel([
 					function(next) {
-						updateTopicTimestamp(topicData, next);
+						updateTopicTimestamp(postData.tid, next);
 					},
 					function(next) {
-						db.sortedSetAdd('cid:' + topicData.cid + ':pids', postData.timestamp, pid, next);
+						db.sortedSetAdd('cid:' + cid + ':pids', postData.timestamp, pid, next);
 					},
 					function(next) {
 						topics.updateTeaser(postData.tid, next);
 					}
-				], next);
-			},
-			function (results, next) {
-				plugins.fireHook('action:post.restore', _.clone(postData));
-				next(null, postData);
+				], function(err) {
+					plugins.fireHook('action:post.restore', _.clone(postData));
+					next(err, postData);
+				});
 			}
 		], callback);
 	};
 
-	function updateTopicTimestamp(topicData, callback) {
-		var timestamp;
-		async.waterfall([
-			function (next) {
-				topics.getLatestUndeletedPid(topicData.tid, next);
-			},
-			function (pid, next) {
-				if (!parseInt(pid, 10)) {
-					return callback();
-				}
-				Posts.getPostField(pid, 'timestamp', next);
-			},
-			function (_timestamp, next) {
-				timestamp = _timestamp;
-				if (!parseInt(timestamp, 10)) {
-					return callback();
-				}
-				topics.updateTimestamp(topicData.tid, timestamp, next);
-			},
-			function (next) {
-				if (parseInt(topicData.pinned, 10) !== 1) {
-					db.sortedSetAdd('cid:' + topicData.cid + ':tids', timestamp, topicData.tid, next);
-				} else {
-					next();
-				}
+	function updateTopicTimestamp(tid, callback) {
+		topics.getLatestUndeletedPid(tid, function(err, pid) {
+			if(err || !pid) {
+				return callback(err);
 			}
-		], callback);
+
+			Posts.getPostField(pid, 'timestamp', function(err, timestamp) {
+				if (err) {
+					return callback(err);
+				}
+
+				if (timestamp) {
+					return topics.updateTimestamp(tid, timestamp, callback);
+				}
+				callback();
+			});
+		});
 	}
 
 	Posts.purge = function(pid, uid, callback) {
@@ -172,7 +160,7 @@ module.exports = function(Posts) {
 					return callback(err);
 				}
 
-				topics.getTopicFields(postData.tid, ['tid', 'cid', 'pinned'], function(err, topicData) {
+				topics.getTopicFields(postData.tid, ['cid'], function(err, topicData) {
 					if (err) {
 						return callback(err);
 					}
@@ -190,14 +178,8 @@ module.exports = function(Posts) {
 						function(next) {
 							topics.updateTeaser(postData.tid, next);
 						},
-						function (next) {
-							updateTopicTimestamp(topicData, next);
-						},
 						function(next) {
 							db.sortedSetIncrBy('cid:' + topicData.cid + ':tids:posts', -1, postData.tid, next);
-						},
-						function(next) {
-							db.sortedSetIncrBy('tid:' + postData.tid + ':posters', -1, postData.uid, next);
 						},
 						function(next) {
 							user.incrementUserPostCountBy(postData.uid, -1, next);

@@ -12,7 +12,6 @@ var path = require('path'),
 
 	emailer = require('./emailer'),
 	meta = require('./meta'),
-	languages = require('./languages'),
 	logger = require('./logger'),
 	plugins = require('./plugins'),
 	middleware = require('./middleware'),
@@ -46,7 +45,7 @@ server.on('error', function(err) {
 module.exports.listen = function() {
 	emailer.registerApp(app);
 
-	app.locals.middleware = middleware = middleware(app);
+	middleware = middleware(app);
 
 	helpers.register();
 
@@ -93,7 +92,6 @@ function initializeNodeBB(callback) {
 				async.apply(!skipJS ? meta.js.minify : meta.js.getFromFile, 'acp.min.js'),
 				async.apply(meta.css.minify),
 				async.apply(meta.sounds.init),
-				async.apply(languages.init),
 				async.apply(meta.blacklist.load)
 			], next);
 		},
@@ -103,9 +101,8 @@ function initializeNodeBB(callback) {
 				middleware: middleware
 			}, next);
 		},
-		async.apply(plugins.fireHook, 'filter:hotswap.prepare', []),
-		function(hotswapIds, next) {
-			routes(app, middleware, hotswapIds);
+		function(next) {
+			routes(app, middleware);
 			next();
 		}
 	], callback);

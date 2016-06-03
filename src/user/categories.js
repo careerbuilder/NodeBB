@@ -45,9 +45,6 @@ module.exports = function(User) {
 					return next(new Error('[[error:no-category]]'));
 				}
 				db.sortedSetAdd('uid:' + uid + ':ignored:cids', Date.now(), cid, next);
-			},
-			function (next) {
-				db.sortedSetAdd('cid:' + cid + ':ignorers', Date.now(), uid, next);
 			}
 		], callback);
 	};
@@ -66,9 +63,6 @@ module.exports = function(User) {
 					return next(new Error('[[error:no-category]]'));
 				}
 				db.sortedSetRemove('uid:' + uid + ':ignored:cids', cid, next);
-			},
-			function (next) {
-				db.sortedSetRemove('cid:' + cid + ':ignorers', uid, next);
 			}
 		], callback);
 	};

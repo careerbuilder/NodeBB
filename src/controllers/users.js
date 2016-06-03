@@ -5,6 +5,7 @@ var user = require('../user');
 var meta = require('../meta');
 
 var pagination = require('../pagination');
+var plugins = require('../plugins');
 var db = require('../database');
 var helpers = require('./helpers');
 
@@ -126,7 +127,6 @@ usersController.getUsers = function(set, uid, page, callback) {
 			loadmore_display: results.usersData.count > (stop - start + 1) ? 'block' : 'hide',
 			users: results.usersData.users,
 			pagination: pagination.create(page, pageCount),
-			userCount: results.usersData.count,
 			title: setToTitles[set] || '[[pages:users/latest]]',
 			breadcrumbs: helpers.buildBreadcrumbs(breadcrumbs),
 			setName: set,
@@ -165,22 +165,26 @@ usersController.getUsersAndCount = function(set, uid, start, stop, callback) {
 };
 
 function render(req, res, data, next) {
-	var registrationType = meta.config.registrationType;
-
-	data.maximumInvites = meta.config.maximumInvites;
-	data.inviteOnly = registrationType === 'invite-only' || registrationType === 'admin-invite-only';
-	data.adminInviteOnly = registrationType === 'admin-invite-only';
-	data['reputation:disabled'] = parseInt(meta.config['reputation:disabled'], 10) === 1;
-
-	user.getInvitesNumber(req.uid, function(err, numInvites) {
+	plugins.fireHook('filter:users.build', {req: req, res: res, templateData: data }, function(err, data) {
 		if (err) {
 			return next(err);
 		}
 
-		res.append('X-Total-Count', data.userCount);
-		data.invites = numInvites;
+		var registrationType = meta.config.registrationType;
 
-		res.render('users', data);
+		data.templateData.maximumInvites = meta.config.maximumInvites;
+		data.templateData.inviteOnly = registrationType === 'invite-only' || registrationType === 'admin-invite-only';
+		data.templateData.adminInviteOnly = registrationType === 'admin-invite-only';
+		data.templateData['reputation:disabled'] = parseInt(meta.config['reputation:disabled'], 10) === 1;
+
+		user.getInvitesNumber(req.uid, function(err, num) {
+			if (err) {
+				return next(err);
+			}
+
+			data.templateData.invites = num;
+			res.render('users', data.templateData);
+		});
 	});
 }
 

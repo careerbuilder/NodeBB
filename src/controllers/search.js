@@ -1,14 +1,14 @@
 
 'use strict';
 
-var async = require('async');
+var async = require('async'),
 
-var meta = require('../meta');
-var plugins = require('../plugins');
-var search = require('../search');
-var categories = require('../categories');
-var pagination = require('../pagination');
-var helpers = require('./helpers');
+	meta = require('../meta'),
+	plugins = require('../plugins'),
+	search = require('../search'),
+	categories = require('../categories'),
+	pagination = require('../pagination'),
+	helpers = require('./helpers');
 
 
 var searchController = {};
@@ -61,7 +61,12 @@ searchController.search = function(req, res, next) {
 		searchData.breadcrumbs = helpers.buildBreadcrumbs([{text: '[[global:search]]'}]);
 		searchData.expandSearch = !req.params.term;
 
-		res.render('search', searchData);
+		plugins.fireHook('filter:search.build', {data: data, results: searchData}, function(err, data) {
+			if (err) {
+				return next(err);
+			}
+			res.render('search', data.results);
+		});
 	});
 };
 

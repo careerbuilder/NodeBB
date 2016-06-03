@@ -133,7 +133,7 @@ helpers.getBaseUser = function(userslug, callerUID, callback) {
 
 			async.parallel({
 				user: function(next) {
-					user.getUserFields(uid, ['uid', 'username', 'userslug', 'picture', 'cover:url', 'cover:position', 'status', 'lastonline', 'groupTitle'], next);
+					user.getUserFields(uid, ['uid', 'username', 'userslug', 'picture', 'cover:url', 'cover:position', 'status', 'lastonline'], next);
 				},
 				isAdmin: function(next) {
 					user.isAdministrator(callerUID, next);

@@ -63,57 +63,22 @@ module.exports = function(privileges) {
 		if (!Array.isArray(pids) || !pids.length) {
 			return callback(null, []);
 		}
-		var cids;
-		var postData;
-		var tids;
-		var tidToTopic = {};
+		posts.getCidsByPids(pids, function(err, cids) {
+			if (err) {
+				return callback(err);
+			}
 
-		async.waterfall([
-			function (next) {
-				posts.getPostsFields(pids, ['uid', 'tid', 'deleted'], next);
-			},
-			function (_posts, next) {
-				postData = _posts;
-				tids = _posts.map(function(post) {
-					return post && post.tid;
-				}).filter(function(tid, index, array) {
-					return tid && array.indexOf(tid) === index;
-				});
-				topics.getTopicsFields(tids, ['deleted', 'cid'], next);
-			},
-			function (topicData, next) {
+			pids = pids.map(function(pid, index) {
+				return {pid: pid, cid: cids[index]};
+			});
 
-				topicData.forEach(function(topic, index) {
-					if (topic) {
-						tidToTopic[tids[index]] = topic;
-					}
-				});
+			privileges.categories.filterCids(privilege, cids, uid, function(err, cids) {
+				if (err) {
+					return callback(err);
+				}
 
-				cids = postData.map(function(post, index) {
-					if (post) {
-						post.pid = pids[index];
-						post.topic = tidToTopic[post.tid];
-					}
-					return tidToTopic[post.tid] && tidToTopic[post.tid].cid;
-				}).filter(function(cid, index, array) {
-					return cid && array.indexOf(cid) === index;
-				});
-
-				privileges.categories.getBase(privilege, cids, uid, next);
-			},
-			function (results, next) {
-
-				var isModOf = {};
-				cids = cids.filter(function(cid, index) {
-					isModOf[cid] = results.isModerators[index];
-					return !results.categories[index].disabled &&
-						(results.allowedTo[index] || results.isAdmin || results.isModerators[index]);
-				});
-
-
-				pids = postData.filter(function(post) {
-					return post.topic && cids.indexOf(post.topic.cid) !== -1 &&
-						((parseInt(post.topic.deleted, 10) !== 1 && parseInt(post.deleted, 10) !== 1) || results.isAdmin || isModOf[post.cid]);
+				pids = pids.filter(function(post) {
+					return cids.indexOf(post.cid) !== -1;
 				}).map(function(post) {
 					return post.pid;
 				});
@@ -122,11 +87,11 @@ module.exports = function(privileges) {
 					privilege: privilege,
 					uid: uid,
 					pids: pids
-				}, function(err, data) {
-					next(err, data ? data.pids : null);
+				},  function(err, data) {
+					callback(err, data ? data.pids : null);
 				});
-			}
-		], callback);
+			});
+		});
 	};
 
 	privileges.posts.canEdit = function(pid, uid, callback) {
